@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2021-05-10 17:24:12
- * @LastEditTime: 2021-05-11 10:51:33
+ * @LastEditTime: 2021-05-11 11:29:39
  * @LastEditors: Please set LastEditors
  * @Description: 在同一个组件内实现新增-编辑-查看弹框
  * @FilePath: \components-antd\src\pages\AddEdit\index.vue
@@ -62,6 +62,7 @@
     </div>
 </template>
 <script>
+import _ from 'lodash'
 export default {
   name: 'warMap',
   data () {
@@ -134,32 +135,32 @@ export default {
         })
     },
     // 提交
-    submit (isSubmit) {
-        // isSubmit：true——提交；false——取消
-        if (isSubmit) {
-          // 提交——调新增或者编辑的接口进行保存
-          this.$refs['ruleForm'].validate((valid) => {
-            if (valid) {
-              // 根据updateRow改变接口和传参
-              const url = this.updateRow.id ? '/.../update' : '/.../add'
-              try {
-                this.$http.post(url, this.updateRow)
-                  .then((res) => {
-                  if (res && res.code === 10000) {
-                      // 提交完成后
-                    this.addEdit(false, true)
-                  }
-                  })
-              } catch {
-                console.log('error')
-              }
+    submit:_.debounce(function(isSubmit){
+      // isSubmit：true——提交；false——取消
+      if (isSubmit) {
+        // 提交——调新增或者编辑的接口进行保存
+        this.$refs['ruleForm'].validate((valid) => {
+          if (valid) {
+            // 根据updateRow改变接口和传参
+            const url = this.updateRow.id ? '/.../update' : '/.../add'
+            try {
+              this.$http.post(url, this.updateRow)
+                .then((res) => {
+                if (res && res.code === 10000) {
+                    // 提交完成后
+                  this.addEdit(false, true)
+                }
+                })
+            } catch {
+              console.log('error')
             }
-          })
-        } else {
-          // 取消——调关闭弹框的函数
-          this.addEdit(false)
-        }
-    },
+          }
+        })
+      } else {
+        // 取消——调关闭弹框的函数
+        this.addEdit(false)
+      }
+    },500)
   }
 }
 </script>
