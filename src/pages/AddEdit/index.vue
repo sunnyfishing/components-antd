@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2021-05-10 17:24:12
- * @LastEditTime: 2021-05-11 11:29:39
+ * @LastEditTime: 2021-05-11 17:44:25
  * @LastEditors: Please set LastEditors
  * @Description: 在同一个组件内实现新增-编辑-查看弹框
  * @FilePath: \components-antd\src\pages\AddEdit\index.vue
@@ -92,10 +92,15 @@ export default {
   created () {
     this.getData()
   },
-  mounted () {
-    this.searchFunc = this.$_.debounce(this.getData, 500) // 给搜索按钮加防抖效果
-  },
   methods: {
+    // 给搜索按钮加防抖效果；重置页码
+    searchFunc: _.debounce(function () {
+      this.pageInfo = {
+        pageNum: 1,
+        pageSize: 10
+      }
+      this.getData()
+    }, 500),
     // 获取表格数据
     getData () {
       this.$http.post('/.../list', { ...this.search, ...this.pageInfo })
