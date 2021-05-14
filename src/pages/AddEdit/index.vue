@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2021-05-10 17:24:12
- * @LastEditTime: 2021-05-11 17:44:25
+ * @LastEditTime: 2021-05-14 10:01:40
  * @LastEditors: Please set LastEditors
  * @Description: 在同一个组件内实现新增-编辑-查看弹框
  * @FilePath: \components-antd\src\pages\AddEdit\index.vue
@@ -49,13 +49,13 @@
         >
         <a-form-model ref="ruleForm" layout="horizontal" :model="updateRow" :rules="addRules">
           <a-form-model-item label="专题名称：" :labelCol="{ span: 6 }" :wrapperCol="{ span: 12 }" prop="name">
-            <a-input style="width:200px" placeholder="请输入专题名称" v-model="updateRow.name" />
+            <a-input style="width:200px" placeholder="请输入专题名称" v-model="updateRow.name" :readonly='updateRow.isCheck' />
           </a-form-model-item>
           <a-form-model-item label=" 排序：" :labelCol="{ span: 6 }" :wrapperCol="{ span: 12 }" prop="sort">
-            <a-input-number :max="999" style="width:200px" placeholder="请输入排序" v-model="updateRow.sort" />
+            <a-input-number :max="999" style="width:200px" placeholder="请输入排序" v-model="updateRow.sort" :readonly='updateRow.isCheck' />
           </a-form-model-item>
           <a-form-model-item label="备注：" :labelCol="{ span: 6 }" :wrapperCol="{ span: 12 }" prop="note">
-            <a-input style="width:200px" placeholder="请输入备注" v-model="updateRow.note" />
+            <a-input style="width:200px" placeholder="请输入备注" v-model="updateRow.note" :readonly='updateRow.isCheck' />
           </a-form-model-item>
         </a-form-model>
       </a-modal>
@@ -101,15 +101,6 @@ export default {
       }
       this.getData()
     }, 500),
-    // 获取表格数据
-    getData () {
-      this.$http.post('/.../list', { ...this.search, ...this.pageInfo })
-        .then((res) => {
-          if (res && res.code === 10000) {
-            this.tableData = res.data.records || []
-          }
-        })
-    },
     // 新增、编辑、查看
     addEdit (isShowModal, isSubmit = false, row = {}) {
       this.isShowModal = isShowModal    // 是否展示弹框
@@ -121,7 +112,7 @@ export default {
     // 翻页、改变页数
     onChange (pagination) {
       if (pagination.pageSize !== this.pageInfo.size) {
-          // 此处说明pageSize改变了，页码重置为1
+        // 此处说明pageSize改变了，页码重置为1
         this.pageInfo.page = 1
       } else {
         this.pageInfo.page = pagination.current
@@ -135,7 +126,20 @@ export default {
         .then(res => {
           if (res.code === 10000) {
             this.$message.success('删除成功')
+            if (this.tableData.length === 1 && this.pageInfo.pageNum !== 1) {
+              // 当删除最后一页的最后一条数据后，页面未自动跳转到前一页的bug修复
+              this.pageInfo.pageNum = this.pageInfo.pageNum - 1
+            }
             this.getData()
+          }
+        })
+    },
+    // 获取表格数据
+    getData () {
+      this.$http.post('/.../list', { ...this.search, ...this.pageInfo })
+        .then((res) => {
+          if (res && res.code === 10000) {
+            this.tableData = res.data.records || []
           }
         })
     },
